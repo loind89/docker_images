@@ -5,7 +5,7 @@ services:
   db:
     image: mysql:5.7
     volumes:
-      - db_data:/var/lib/mysql
+      - ./mysql_data:/var/lib/mysql
     networks:
       - wpnet
     environment:
@@ -47,7 +47,7 @@ services:
       - db
     image: wordpress
     volumes:
-      - web_dir:/var/www/html
+      - ./web_dir:/var/www/html
     ports:
       - 8000:80
     networks:
@@ -62,12 +62,12 @@ services:
       # labels: [APP=VOTING]
 networks:
     wpnet:
-volumes:
-    db_data:
-    web_dir:
-      # driver: local-persist
-      # driver_opts:
-      #   mountpoint: ./web_dir
+# volumes:
+#     db_data:
+    # web_dir:
+    #   driver: local-persist
+    #   driver_opts:
+    #     mountpoint:/volumes/web_dir
     
 
 
