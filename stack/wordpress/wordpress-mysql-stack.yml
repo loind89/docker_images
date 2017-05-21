@@ -1,0 +1,73 @@
+##docker stack deploy -c stack.yml wordpress (or docker-compose -f stack.yml up )
+version: '3.1'
+
+services:
+  db:
+    image: mysql:5.7
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - wpnet
+    environment:
+      MYSQL_ROOT_PASSWORD: somewordpress
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    deploy:
+      # mode: replicated
+      # replicas: 2
+      # labels: [APP=VOTING]
+      # placement:
+      #   constraints: [node.role == manager]
+       # service resource management
+      resources:
+          # Hard limit - Docker does not allow to allocate more
+          limits:
+            cpus: '0.25'
+            memory: 512M
+          # Soft limit - Docker makes best effort to return to it
+          reservations:
+            cpus: '0.25'
+            memory: 256M
+       # service restart policy
+      restart_policy:
+          condition: on-failure
+          delay: 5s
+          max_attempts: 3
+          window: 120s
+      # service update configuration
+      update_config:
+        parallelism: 1
+        delay: 10s
+        failure_action: continue
+        monitor: 60s
+        max_failure_ratio: 0.3
+  web:
+    depends_on:
+      - db
+    image: wordpress
+    volumes:
+      - web_dir:/var/www/html
+    ports:
+      - 8000:80
+    networks:
+      - wpnet
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+    deploy:
+      mode: replicated
+      replicas: 2
+      # labels: [APP=VOTING]
+networks:
+    wpnet:
+volumes:
+    db_data:
+    web_dir:
+      # driver: local-persist
+      # driver_opts:
+      #   mountpoint: ./web_dir
+    
+
+
